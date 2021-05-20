@@ -1,8 +1,11 @@
 {
-  "name": "safe-transactions-sdk",
+  "name": "@rsksmart/safe-transactions-sdk",
   "version": "1.0.0",
   "description": "RIF Safe Transactions SDK",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "npx hardhat test",
     "test:coverage": "nyc hardhat test",
