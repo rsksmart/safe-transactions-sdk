@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers'
 import { deployments, ethers, waffle } from 'hardhat'
 import { ERC20TransactionBuilder } from '../src'
 import { getSafeWithOwners, balanceVerifierFactory } from './utils/setup'
-import EthersSafe, { SafeTransaction } from "@gnosis.pm/safe-core-sdk";
+import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
 chai.use(chaiAsPromised)
 
 describe('ERC20 transaction builder', () => {
@@ -28,7 +28,9 @@ describe('ERC20 transaction builder', () => {
     }
 
     const accountBalanceVerifier = async (accountAddress: string) => {
-      const balanceVerifier = balanceVerifierFactory((addr: string) => MockERC20Token.balanceOf(addr))
+      const balanceVerifier = balanceVerifierFactory((addr: string) =>
+        MockERC20Token.balanceOf(addr)
+      )
       return await balanceVerifier(accountAddress)
     }
 
@@ -94,12 +96,8 @@ describe('ERC20 transaction builder', () => {
   })
 
   it('should create a Safe ERC20 approve transaction', async () => {
-    const {
-      ethersSafe,
-      MockERC20Token,
-      erc20TransactionBuilder,
-      signAndExecuteTx
-    } = await setupTests()
+    const { ethersSafe, MockERC20Token, erc20TransactionBuilder, signAndExecuteTx } =
+      await setupTests()
 
     await MockERC20Token.transfer(ethersSafe.getAddress(), 1_000_000)
 
