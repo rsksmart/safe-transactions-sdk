@@ -6,17 +6,17 @@
     RIF Safe Transactions SDK
 </p>
 <p align="middle">
-  <a href="https://github.com/rsksmart/rif-multisig-sdk/actions?query=workflow%3Aci">
-    <img src="https://github.com/rsksmart/rif-multisig-sdk/workflows/ci/badge.svg" />
+  <a href="https://github.com/rsksmart/safe-transactions-sdk/actions?query=workflow%3Aci">
+    <img src="https://github.com/rsksmart/safe-transactions-sdk/workflows/ci/badge.svg" />
   </a>
-  <a href="https://lgtm.com/projects/g/rsksmart/rif-multisig-sdk/context:javascript">
-    <img src="https://img.shields.io/lgtm/grade/javascript/github/rsksmart/rif-multisig-sdk" />
+  <a href="https://lgtm.com/projects/g/rsksmart/safe-transactions-sdk/context:javascript">
+    <img src="https://img.shields.io/lgtm/grade/javascript/github/rsksmart/safe-transactions-sdk" />
   </a>
-  <a href='https://coveralls.io/github/rsksmart/rif-multisig-sdk?branch=main'>
-    <img src='https://coveralls.io/repos/github/rsksmart/rif-multisig-sdk/badge.svg?branch=main' alt='Coverage Status' />
+  <a href='https://coveralls.io/github/rsksmart/safe-transactions-sdk?branch=main'>
+    <img src='https://coveralls.io/repos/github/rsksmart/safe-transactions-sdk/badge.svg?branch=main' alt='Coverage Status' />
   </a>
-  <a href="https://badge.fury.io/js/%40rsksmart%2Frif-multisig-sdk">
-    <img src="https://badge.fury.io/js/%40rsksmart%2Frif-multisig-sdk.svg" alt="npm" />
+  <a href="https://badge.fury.io/js/%40rsksmart%2Fsafe-transactions-sdk">
+    <img src="https://badge.fury.io/js/%40rsksmart%2Fsafe-transactions-sdk.svg" alt="npm" />
   </a>
 </p>
 
