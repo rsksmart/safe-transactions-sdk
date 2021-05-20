@@ -2,13 +2,13 @@
   "name": "safe-transactions-sdk",
   "version": "1.0.0",
   "description": "RIF Safe Transactions SDK",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "npx hardhat test",
     "test:coverage": "nyc hardhat test",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier \"{src,test,hardhat}/**/*.ts\" --write",
-    "build": "npx webpack",
+    "build": "rimraf dist && npx webpack",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -55,6 +55,7 @@
     "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
     "nyc": "^15.1.0",
+    "rimraf": "^2.7.1",
     "ts-loader": "^9.2.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
