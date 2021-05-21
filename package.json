@@ -1,0 +1,59 @@
+{
+  "name": "safe-transactions-sdk",
+  "version": "1.0.0",
+  "description": "RIF Safe Transactions SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "test:coverage": "nyc hardhat test",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier \"{src,tests,hardhat}/**/*.ts\" --write",
+    "build": "npx webpack",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,js}": [
+      "npm run lint",
+      "npm run format"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsksmart/safe-transactions-sdk.git"
+  },
+  "keywords": [
+    "rsk",
+    "rif",
+    "multisig"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rsksmart/safe-transactions-sdk/issues"
+  },
+  "homepage": "https://github.com/rsksmart/safe-transactions-sdk#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@types/chai": "^4.2.18",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.24.0",
+    "@typescript-eslint/parser": "^4.24.0",
+    "chai": "^4.3.4",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.1.4",
+    "hardhat": "^2.3.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
+    "nyc": "^15.1.0",
+    "ts-loader": "^9.2.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
+  }
+}
