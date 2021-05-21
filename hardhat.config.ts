@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-ethers'
-import 'hardhat-deploy';
+import 'hardhat-deploy'
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -18,9 +18,7 @@ task('accounts', 'Prints the list of accounts', async (args, hre) => {
 
 export default {
   solidity: {
-    compilers: [
-      { version: '0.5.17' }
-    ]
+    compilers: [{ version: '0.5.17' }]
   },
   paths: {
     artifacts: 'artifacts',
@@ -33,11 +31,11 @@ export default {
       allowUnlimitedContractSize: true,
       blockGasLimit: 100000000,
       gas: 100000000
-    },
+    }
   },
   namedAccounts: {
     deployer: {
       default: 0
     }
   }
-};
+}
