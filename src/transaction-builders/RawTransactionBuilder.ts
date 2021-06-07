@@ -1,5 +1,5 @@
 import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
-import TransactionBuilderAbstract from './TransactionBuilderAbstract'
+import { TransactionBuilderAbstract } from './TransactionBuilderAbstract'
 
 export class RawTransactionBuilder extends TransactionBuilderAbstract {
   constructor(safe: Safe) {
@@ -14,5 +14,3 @@ export class RawTransactionBuilder extends TransactionBuilderAbstract {
     })
   }
 }
-
-export default RawTransactionBuilder
