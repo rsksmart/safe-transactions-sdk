@@ -1,5 +1,5 @@
 import { Contract, BigNumber } from 'ethers'
-import RawTransactionBuilder from './RawTransactionBuilder'
+import { RawTransactionBuilder } from './RawTransactionBuilder'
 import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
 
 export class ERC20TransactionBuilder extends RawTransactionBuilder {
@@ -39,5 +39,3 @@ export class ERC20TransactionBuilder extends RawTransactionBuilder {
     return this.rawTransaction(this.#erc20Contract.address, '0', transactionData)
   }
 }
-
-export default ERC20TransactionBuilder

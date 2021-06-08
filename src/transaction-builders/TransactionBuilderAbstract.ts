@@ -11,5 +11,3 @@ export abstract class TransactionBuilderAbstract {
     return this.#safe
   }
 }
-
-export default TransactionBuilderAbstract
