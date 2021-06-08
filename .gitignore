@@ -7,3 +7,4 @@ artifacts
 deployments
 
 .nyc_output
+coverage
