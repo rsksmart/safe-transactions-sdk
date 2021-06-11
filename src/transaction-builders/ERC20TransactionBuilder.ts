@@ -17,6 +17,12 @@ export class ERC20TransactionBuilder extends RawTransactionBuilder {
     ])
   }
 
+  static async create(safe: Safe, erc20Address: string) {
+    const code = await safe.getProvider().getCode(erc20Address)
+    if (code === '0x') throw new Error('Invalid contract')
+    return new ERC20TransactionBuilder(safe, erc20Address)
+  }
+
   async transfer(to: string, value: BigNumber): Promise<SafeTransaction> {
     const transactionData = this.#erc20Contract.encodeFunctionData('transfer', [to, value])
     return this.createSafeTransaction(transactionData)

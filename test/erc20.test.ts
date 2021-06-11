@@ -17,7 +17,10 @@ describe('ERC20 transaction builder', () => {
     await MockERC20Token.deployed()
     const safe = await getSafeWithOwners([user1.address, user2.address])
     const ethersSafe = await EthersSafe.create(ethers, safe.address, user1)
-    const erc20TransactionBuilder = new ERC20TransactionBuilder(ethersSafe, MockERC20Token.address)
+    const erc20TransactionBuilder = await ERC20TransactionBuilder.create(
+      ethersSafe,
+      MockERC20Token.address
+    )
 
     const signAndExecuteTx = async (safeERC20: EthersSafe, safeTransaction: SafeTransaction) => {
       await safeERC20.signTransaction(safeTransaction)
@@ -41,6 +44,14 @@ describe('ERC20 transaction builder', () => {
       signAndExecuteTx,
       accountBalanceVerifier
     }
+  })
+
+  it('should not allow to create ERC20 transaction builder for token with no code', async () => {
+    const { ethersSafe } = await setupTests()
+    const address = await user1.getAddress()
+    await expect(ERC20TransactionBuilder.create(ethersSafe, address)).rejectedWith(
+      'Invalid contract'
+    )
   })
 
   it('should create a Safe ERC20 transfer transaction', async () => {
