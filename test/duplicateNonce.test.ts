@@ -53,7 +53,13 @@ describe('checking nonce', () => {
     const exReceipt2 = await ethersSafe.executeTransaction(tx2)
     await exReceipt2.wait()
 
-    // execute the first transaction, which SHOULD FAIL
+    // the safe's nonce should be incremented to 1:
+    expect(await ethersSafe.getNonce()).to.equal(1)
+
+    // the nonce of transaction 1 is still 0:
+    expect(tx1.data.nonce).to.equal(0)
+
+    // execute the first transaction, which SHOULD FAIL since the nonce has already been used:
     const exReceipt1 = await ethersSafe.executeTransaction(tx1)
     await exReceipt1.wait()
 
