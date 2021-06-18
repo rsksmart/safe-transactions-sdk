@@ -66,4 +66,35 @@ describe('checking nonce', () => {
     const safeNonce = await ethersSafe.getNonce()
     expect(safeNonce).to.equal(2)
   })
+
+  it('same test, but signatures signed off-chain', async () => {
+    const { ethersSafe } = await setupTests()
+
+    const tx1 = await ethersSafe.createTransaction({
+      to: user1.address,
+      value: '10000',
+      data: EMPTY_DATA
+    })
+
+    expect(tx1.data.nonce).to.equal(0)
+
+    // sign the first transaction
+    await ethersSafe.signTransaction(tx1)
+
+    // create second transaction with same nonce, then sign it:
+    const tx2 = await rejectTx(ethersSafe, tx1)
+    await ethersSafe.signTransaction(tx2)
+    expect(tx2.data.nonce).to.equal(tx1.data.nonce)
+
+    // execute the first transaction
+    const resultTx1 = await ethersSafe.executeTransaction(tx1)
+    resultTx1.wait()
+
+    // execute the second transaction, which should fail:
+    const resultTx2 = await ethersSafe.executeTransaction(tx2)
+    resultTx2.wait()
+
+    // nonce was incremented by 2:
+    expect(await ethersSafe.getNonce()).to.equal(2)
+  })
 })
