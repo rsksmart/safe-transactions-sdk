@@ -2,8 +2,13 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import spies from 'chai-spies'
 import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
-import { deployments, ethers, waffle, network } from 'hardhat'
-import { EMPTY_DATA, RSK_CHAIN_IDS, RSK_MAINNET_CHAIN_ID, RSK_TESTNET_CHAIN_ID } from '../src/utils/constants'
+import { deployments, ethers, waffle } from 'hardhat'
+import {
+  EMPTY_DATA,
+  RSK_CHAIN_IDS,
+  RSK_MAINNET_CHAIN_ID,
+  RSK_TESTNET_CHAIN_ID
+} from '../src/utils/constants'
 import { getSafeWithOwners } from './utils/setup'
 import { executeTransaction } from '../src'
 chai.use(chaiAsPromised)
