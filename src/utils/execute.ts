@@ -1,5 +1,5 @@
 import { Safe, SafeSignature, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
-import safeAbi from '@gnosis.pm/safe-core-sdk/dist/src/abis/SafeAbiV1-2-0.json'
+import safeAbi from './SafeAbiV1-2-0.json'
 import { EthSignSignature } from '@gnosis.pm/safe-core-sdk/dist/src/utils/signatures/SafeSignature'
 import { Contract, ContractTransaction } from 'ethers'
 import { RSK_CHAIN_IDS } from './constants'
