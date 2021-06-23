@@ -1,1 +1,5 @@
 export const EMPTY_DATA = '0x'
+
+export const RSK_MAINNET_CHAIN_ID = 30
+export const RSK_TESTNET_CHAIN_ID = 31
+export const RSK_CHAIN_IDS = [RSK_MAINNET_CHAIN_ID, RSK_TESTNET_CHAIN_ID]
