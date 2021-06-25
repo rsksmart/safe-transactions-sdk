@@ -4,6 +4,8 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/ERC721Full.sol';
 import '@openzeppelin/contracts/drafts/Counters.sol';
 
+import '@openzeppelin/contracts/token/ERC721/ERC721Holder.sol';
+
 contract MockERC20Token is ERC20 {
     string public name = 'MockERC20';
     string public symbol = 'MCK_20';

@@ -110,10 +110,32 @@ describe('ERC721 transaction builder', () => {
     expect(newOwner).to.be.eq(tokenReceiver)
   })
 
-  // it('should create a Safe ERC721 safeTransferFrom transaction with data', async () => {
-  //   // TODO:
-  //   expect(false).to.be.true
-  // })
+  it('should create a Safe ERC721 safeTransferFrom transaction with data', async () => {
+    const {
+      ethersSafe,
+      MockERC721Token,
+      erc721TransactionBuilder,
+      signAndExecuteTx,
+      tokenAssigned
+    } = await setupTests()
+
+    const ERC721HolderFactory = await ethers.getContractFactory('ERC721Holder')
+    const ERC721Holder = await ERC721HolderFactory.deploy()
+    await ERC721Holder.deployed()
+    const tokenReceiver = ERC721Holder.address
+    // const receiverSafe = await getSafeWithOwners([user3.address])
+    // const tokenReceiver = receiverSafe.address
+
+    const safeTx = await erc721TransactionBuilder.safeTransferFrom(
+      ethersSafe.getAddress(),
+      tokenReceiver,
+      tokenAssigned,
+      ''
+    )
+    await signAndExecuteTx(ethersSafe, safeTx)
+    const newOwner = await MockERC721Token.ownerOf(tokenAssigned)
+    expect(newOwner).to.be.eq(tokenReceiver)
+  })
 
   it('should create a Safe ERC721 approve transaction', async () => {
     const {
