@@ -41,16 +41,17 @@ export class ERC721TransactionBuilder extends RawTransactionBuilder {
     tokenId: BigNumber,
     data?: string
   ): Promise<SafeTransaction> {
-    const transactionData = data
-      ? this.#erc721Contract.encodeFunctionData(
-          'safeTransferFrom(address, address, uint256, bytes)',
-          [from, to, tokenId, data]
-        )
-      : this.#erc721Contract.encodeFunctionData('safeTransferFrom(address, address, uint256)', [
-          from,
-          to,
-          tokenId
-        ])
+    const transactionData =
+      data !== undefined
+        ? this.#erc721Contract.encodeFunctionData(
+            'safeTransferFrom(address, address, uint256, bytes)',
+            [from, to, tokenId, data]
+          )
+        : this.#erc721Contract.encodeFunctionData('safeTransferFrom(address, address, uint256)', [
+            from,
+            to,
+            tokenId
+          ])
     return this.createSafeTransaction(transactionData)
   }
 

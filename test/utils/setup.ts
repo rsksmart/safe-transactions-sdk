@@ -23,14 +23,18 @@ export const getSafeTemplate = async (): Promise<Contract> => {
   return Safe.attach(template)
 }
 
-export const getSafeWithOwners = async (owners: string[], threshold?: number) => {
+export const getSafeWithOwners = async (
+  owners: string[],
+  threshold?: number,
+  callbackHandler: string = AddressZero
+): Promise<Contract> => {
   const template = await getSafeTemplate()
   await template.setup(
     owners,
     threshold || owners.length,
     AddressZero,
     '0x',
-    AddressZero,
+    callbackHandler,
     AddressZero,
     0,
     AddressZero
@@ -47,3 +51,9 @@ export const balanceVerifierFactory =
       return diff.eq(expected)
     }
   }
+
+export const getDefaultCallbackHandler = async (): Promise<Contract> => {
+  const DefaultCallbackDeployment = await deployments.get('DefaultCallbackHandler')
+  const DefaultCallbackFactory = await ethers.getContractFactory('DefaultCallbackHandler')
+  return DefaultCallbackFactory.attach(DefaultCallbackDeployment.address)
+}

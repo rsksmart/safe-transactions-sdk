@@ -4,7 +4,8 @@ import chaiAsPromised from 'chai-as-promised'
 import { BigNumber, Event, ContractTransaction } from 'ethers'
 import { deployments, ethers, waffle } from 'hardhat'
 import { ERC721TransactionBuilder } from '../src'
-import { getSafeWithOwners } from './utils/setup'
+import { EMPTY_DATA } from '../src/utils/constants'
+import { getDefaultCallbackHandler, getSafeWithOwners } from './utils/setup'
 chai.use(chaiAsPromised)
 
 describe('ERC721 transaction builder', () => {
@@ -57,14 +58,7 @@ describe('ERC721 transaction builder', () => {
     )
   })
 
-  it('should receive an ERC721 token successfully', async () => {
-    const { ethersSafe, MockERC721Token, tokenAssigned } = await setupTests()
-
-    const owner = await MockERC721Token.ownerOf(tokenAssigned)
-    expect(owner).to.be.eq(ethersSafe.getAddress())
-  })
-
-  it('should create a Safe ERC721 transferFrom transaction', async () => {
+  it('should create a ERC721 transferFrom Safe transaction', async () => {
     const {
       ethersSafe,
       MockERC721Token,
@@ -87,7 +81,7 @@ describe('ERC721 transaction builder', () => {
     expect(newOwner).to.be.eq(tokenReceiver)
   })
 
-  it('should create a Safe ERC721 safeTransferFrom transaction', async () => {
+  it('should create a ERC721 safeTransferFrom Safe transaction to transfer a token to a non-contract address', async () => {
     const {
       ethersSafe,
       MockERC721Token,
@@ -110,31 +104,110 @@ describe('ERC721 transaction builder', () => {
     expect(newOwner).to.be.eq(tokenReceiver)
   })
 
-  it('should create a Safe ERC721 safeTransferFrom transaction with data', async () => {
-    const {
-      ethersSafe,
-      MockERC721Token,
-      erc721TransactionBuilder,
-      signAndExecuteTx,
-      tokenAssigned
-    } = await setupTests()
+  describe('should create a Safe ERC721 safeTransferFrom transaction to transfer a token to a contract address', () => {
+    it("that doesn't implement ERC721 token receiver interface", async () => {
+      const { ethersSafe, erc721TransactionBuilder, tokenAssigned } = await setupTests()
 
-    const ERC721HolderFactory = await ethers.getContractFactory('ERC721Holder')
-    const ERC721Holder = await ERC721HolderFactory.deploy()
-    await ERC721Holder.deployed()
-    const tokenReceiver = ERC721Holder.address
-    // const receiverSafe = await getSafeWithOwners([user3.address])
-    // const tokenReceiver = receiverSafe.address
+      const owners = [user3.address]
+      const receiverSafe = await getSafeWithOwners(owners, owners.length)
+      const tokenReceiver = receiverSafe.address
 
-    const safeTx = await erc721TransactionBuilder.safeTransferFrom(
-      ethersSafe.getAddress(),
-      tokenReceiver,
-      tokenAssigned,
-      ''
-    )
-    await signAndExecuteTx(ethersSafe, safeTx)
-    const newOwner = await MockERC721Token.ownerOf(tokenAssigned)
-    expect(newOwner).to.be.eq(tokenReceiver)
+      // it should fail on tx execution, but it actually fails
+      // on tx creation due to gas estimation.
+      // See https://github.com/gnosis/safe-core-sdk/blob/v0.1.2/src/utils/transactions/utils.ts#L6
+      await expect(
+        erc721TransactionBuilder.safeTransferFrom(
+          ethersSafe.getAddress(),
+          tokenReceiver,
+          tokenAssigned
+        )
+      ).to.be.rejected
+    })
+
+    it('that implements ERC721 token receiver interface', async () => {
+      const {
+        ethersSafe,
+        MockERC721Token,
+        erc721TransactionBuilder,
+        signAndExecuteTx,
+        tokenAssigned
+      } = await setupTests()
+
+      const defaultCallbackHandler = await getDefaultCallbackHandler()
+      const owners = [user3.address]
+      const receiverSafe = await getSafeWithOwners(
+        owners,
+        owners.length,
+        defaultCallbackHandler.address
+      )
+      const tokenReceiver = receiverSafe.address
+
+      const safeTx = await erc721TransactionBuilder.safeTransferFrom(
+        ethersSafe.getAddress(),
+        tokenReceiver,
+        tokenAssigned
+      )
+
+      await signAndExecuteTx(ethersSafe, safeTx)
+
+      const newOwner = await MockERC721Token.ownerOf(tokenAssigned)
+      expect(newOwner).to.be.eq(tokenReceiver)
+    })
+  })
+
+  describe('should create a Safe ERC721 safeTransferFrom transaction ', () => {
+    it('with empty data', async () => {
+      const {
+        ethersSafe,
+        MockERC721Token,
+        erc721TransactionBuilder,
+        signAndExecuteTx,
+        tokenAssigned
+      } = await setupTests()
+
+      const ERC721HolderFactory = await ethers.getContractFactory('ERC721Holder')
+      const ERC721Holder = await ERC721HolderFactory.deploy()
+      await ERC721Holder.deployed()
+      const tokenReceiver = ERC721Holder.address
+
+      const safeTx = await erc721TransactionBuilder.safeTransferFrom(
+        ethersSafe.getAddress(),
+        tokenReceiver,
+        tokenAssigned,
+        EMPTY_DATA
+      )
+      await signAndExecuteTx(ethersSafe, safeTx)
+      const newOwner = await MockERC721Token.ownerOf(tokenAssigned)
+      expect(newOwner).to.be.eq(tokenReceiver)
+    })
+    it('with no empty data', async () => {
+      const {
+        ethersSafe,
+        MockERC721Token,
+        erc721TransactionBuilder,
+        signAndExecuteTx,
+        tokenAssigned
+      } = await setupTests()
+
+      const ERC721HolderFactory = await ethers.getContractFactory('MockERC721Holder')
+      const ERC721Holder = await ERC721HolderFactory.deploy()
+      await ERC721Holder.deployed()
+      const tokenReceiver = ERC721Holder.address
+
+      const expectedData = 'hello'
+      const safeTx = await erc721TransactionBuilder.safeTransferFrom(
+        ethersSafe.getAddress(),
+        tokenReceiver,
+        tokenAssigned,
+        ethers.utils.formatBytes32String(expectedData)
+      )
+      await signAndExecuteTx(ethersSafe, safeTx)
+      const newOwner = await MockERC721Token.ownerOf(tokenAssigned)
+      expect(newOwner).to.be.eq(tokenReceiver)
+
+      const data = ethers.utils.parseBytes32String(await ERC721Holder.storedData())
+      expect(data).to.be.eq(expectedData)
+    })
   })
 
   it('should create a Safe ERC721 approve transaction', async () => {

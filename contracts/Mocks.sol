@@ -4,7 +4,7 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/ERC721Full.sol';
 import '@openzeppelin/contracts/drafts/Counters.sol';
 
-import '@openzeppelin/contracts/token/ERC721/ERC721Holder.sol';
+import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 
 contract MockERC20Token is ERC20 {
     string public name = 'MockERC20';
@@ -34,5 +34,19 @@ contract MockERC721Token is ERC721Full {
         _mint(owner, newItemId);
 
         return newItemId;
+    }
+}
+
+contract MockERC721Holder is IERC721Receiver {
+    bytes public storedData;
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory data
+    ) public returns (bytes4) {
+        storedData = data;
+        return this.onERC721Received.selector;
     }
 }
