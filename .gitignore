@@ -8,3 +8,5 @@ deployments
 
 .nyc_output
 coverage
+
+.vscode

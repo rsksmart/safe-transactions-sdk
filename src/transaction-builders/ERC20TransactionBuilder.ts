@@ -1,48 +1,36 @@
-import { BigNumber, utils } from 'ethers'
-import { RawTransactionBuilder } from './RawTransactionBuilder'
 import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import { BigNumber, utils } from 'ethers'
+import { validateIsDeployedContract } from '../utils/contracts'
+import { ContractBasedTransactionBuilder } from './ContractBasedTransactionBuilder'
 
-export class ERC20TransactionBuilder extends RawTransactionBuilder {
-  public erc20Address: string
-  #erc20Contract: utils.Interface
+const ERC_20_CONTRACT_INTERFACE = new utils.Interface([
+  'function transfer(address to, uint amount)',
+  'function transferFrom(address from, address to, uint amount)',
+  'function approve(address spender, uint amount)'
+])
 
+export class ERC20TransactionBuilder extends ContractBasedTransactionBuilder {
   constructor(safe: Safe, erc20Address: string) {
-    super(safe)
-    this.erc20Address = erc20Address
-
-    this.#erc20Contract = new utils.Interface([
-      'function transfer(address to, uint amount)',
-      'function transferFrom(address from, address to, uint amount)',
-      'function approve(address spender, uint amount)'
-    ])
+    super(safe, erc20Address, ERC_20_CONTRACT_INTERFACE)
   }
 
-  static async create(safe: Safe, erc20Address: string) {
-    const code = await safe.getProvider().getCode(erc20Address)
-    if (code === '0x') throw new Error('Invalid contract')
+  public get erc20Address(): string {
+    return this.contractAddress
+  }
+  static async create(safe: Safe, erc20Address: string): Promise<ERC20TransactionBuilder> {
+    await validateIsDeployedContract(safe, erc20Address)
     return new ERC20TransactionBuilder(safe, erc20Address)
   }
 
   async transfer(to: string, value: BigNumber): Promise<SafeTransaction> {
-    const transactionData = this.#erc20Contract.encodeFunctionData('transfer', [to, value])
-    return this.createSafeTransaction(transactionData)
+    return this.getContractTransaction('transfer', [to, value])
   }
 
   async transferFrom(from: string, to: string, value: BigNumber): Promise<SafeTransaction> {
-    const transactionData = this.#erc20Contract.encodeFunctionData('transferFrom', [
-      from,
-      to,
-      value
-    ])
-    return this.createSafeTransaction(transactionData)
+    return this.getContractTransaction('transferFrom', [from, to, value])
   }
 
   async approve(spender: string, amount: BigNumber): Promise<SafeTransaction> {
-    const transactionData = this.#erc20Contract.encodeFunctionData('approve', [spender, amount])
-    return this.createSafeTransaction(transactionData)
-  }
-
-  private createSafeTransaction(transactionData: string): Promise<SafeTransaction> {
-    return this.rawTransaction(this.erc20Address, '0', transactionData)
+    return this.getContractTransaction('approve', [spender, amount])
   }
 }

@@ -19,6 +19,13 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
     deterministicDeployment: true
   })
+
+  await deploy('DefaultCallbackHandler', {
+    from: deployer,
+    args: [],
+    log: true,
+    deterministicDeployment: true
+  })
 }
 
 export default deploy

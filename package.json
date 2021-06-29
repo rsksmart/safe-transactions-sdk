@@ -11,7 +11,7 @@
     "test:coverage": "nyc --reporter=lcov hardhat test",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier \"{src,test,hardhat}/**/*.ts\" --write",
-    "build": "rimraf dist && npx webpack",
+    "build": "rimraf lib && npx webpack",
     "prepare": "husky install"
   },
   "lint-staged": {
