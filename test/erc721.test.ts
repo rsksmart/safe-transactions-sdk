@@ -1,7 +1,7 @@
 import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { BigNumber, Event, ContractTransaction } from 'ethers'
+import { BigNumber, ContractTransaction, Event } from 'ethers'
 import { deployments, ethers, waffle } from 'hardhat'
 import { ERC721TransactionBuilder } from '../src'
 import { EMPTY_DATA } from '../src/utils/constants'
@@ -54,8 +54,13 @@ describe('ERC721 transaction builder', () => {
     const { ethersSafe } = await setupTests()
     const address = await user1.getAddress()
     await expect(ERC721TransactionBuilder.create(ethersSafe, address)).rejectedWith(
-      'Invalid contract'
+      'Contract is not deployed in the current network'
     )
+  })
+
+  it('should expose the contract address', async () => {
+    const { MockERC721Token, erc721TransactionBuilder } = await setupTests()
+    expect(erc721TransactionBuilder.erc721Address).to.be.eq(MockERC721Token.address)
   })
 
   it('should create a ERC721 transferFrom Safe transaction', async () => {

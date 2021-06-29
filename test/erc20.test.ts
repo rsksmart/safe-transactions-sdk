@@ -50,8 +50,13 @@ describe('ERC20 transaction builder', () => {
     const { ethersSafe } = await setupTests()
     const address = await user1.getAddress()
     await expect(ERC20TransactionBuilder.create(ethersSafe, address)).rejectedWith(
-      'Invalid contract'
+      'Contract is not deployed in the current network'
     )
+  })
+
+  it('should expose the contract address', async () => {
+    const { MockERC20Token, erc20TransactionBuilder } = await setupTests()
+    expect(erc20TransactionBuilder.erc20Address).to.be.eq(MockERC20Token.address)
   })
 
   it('should create a Safe ERC20 transfer transaction', async () => {
