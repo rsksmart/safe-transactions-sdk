@@ -170,7 +170,7 @@ describe('ERC721 transaction builder', () => {
         tokenAssigned
       } = await setupTests()
 
-      const ERC721HolderFactory = await ethers.getContractFactory('ERC721Holder')
+      const ERC721HolderFactory = await ethers.getContractFactory('MockERC721Holder')
       const ERC721Holder = await ERC721HolderFactory.deploy()
       await ERC721Holder.deployed()
       const tokenReceiver = ERC721Holder.address
