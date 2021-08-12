@@ -1,12 +1,12 @@
-import { Safe, SafeSignature, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import Safe, { TransactionResult } from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import safeAbi from './SafeAbiV1-2-0.json'
-import { EthSignSignature } from '@gnosis.pm/safe-core-sdk/dist/src/utils/signatures/SafeSignature'
-import { Contract, ContractTransaction } from 'ethers'
+import { Contract } from 'ethers'
 import { RSK_CHAIN_IDS } from './constants'
 
 // COPIED from https://github.com/gnosis/safe-core-sdk/blob/main/packages/safe-core-sdk/src/utils/transactions/gas.ts#L84-L107
 // the function is as is and not modified other than removal of 'export'
-async function estimateGasForTransactionExecution(
+export async function estimateGasForTransactionExecution(
   contract: Contract,
   from: string,
   tx: SafeTransaction
@@ -32,19 +32,8 @@ async function estimateGasForTransactionExecution(
   }
 }
 
-// copied from https://github.com/gnosis/safe-core-sdk/blob/main/packages/safe-core-sdk/src/utils/signatures/index.ts
-// the function is as is and not modified other than removal of 'export'
-const generatePreValidatedSignature = (ownerAddress: string): SafeSignature => {
-  const signature =
-    '0x000000000000000000000000' +
-    ownerAddress.slice(2) +
-    '0000000000000000000000000000000000000000000000000000000000000000' +
-    '01'
-
-  return new EthSignSignature(ownerAddress, signature)
-}
-
 const RSK_GAS_PATCH = 30_000
+
 /**
  * A modified version of Gnosis's safe.executeTransaction function. For RSK, it
  * adds 30,000 to the gas estimation which is required on RSK.
@@ -52,66 +41,23 @@ const RSK_GAS_PATCH = 30_000
  * @param safeTransaction SafeTransaction ready to be executed
  * @returns ContractTransaction
  */
-export const executeTransactionOnRSK = async (
-  safe: Safe,
-  safeTransaction: SafeTransaction
-): Promise<ContractTransaction> => {
-  const signer = safe.getSigner()
-  const signerAddress = await signer?.getAddress()
-
-  if (!signerAddress) {
-    throw new Error('No signer provided')
-  }
-
-  const safeContract = new Contract(safe.getAddress(), safeAbi, signer)
-  const txHash = await safe.getTransactionHash(safeTransaction)
-  const ownersWhoApprovedTx = await safe.getOwnersWhoApprovedTx(txHash)
-
-  // add the signatures to the safeTransaction object
-  for (const owner of ownersWhoApprovedTx) {
-    safeTransaction.addSignature(generatePreValidatedSignature(owner))
-  }
-
-  const threshold = await safe.getThreshold()
-  if (threshold > safeTransaction.signatures.size) {
-    const signaturesMissing = threshold - safeTransaction.signatures.size
-    throw new Error(
-      `There ${signaturesMissing > 1 ? 'are' : 'is'} ${signaturesMissing} signature${
-        signaturesMissing > 1 ? 's' : ''
-      } missing`
-    )
-  }
-
-  const gasLimit = await estimateGasForTransactionExecution(
-    safeContract,
-    signerAddress.toLowerCase(),
-    safeTransaction
-  )
-
-  const txResponse = await safeContract.execTransaction(
-    safeTransaction.data.to,
-    safeTransaction.data.value,
-    safeTransaction.data.data,
-    safeTransaction.data.operation,
-    safeTransaction.data.safeTxGas,
-    safeTransaction.data.baseGas,
-    safeTransaction.data.gasPrice,
-    safeTransaction.data.gasToken,
-    safeTransaction.data.refundReceiver,
-    safeTransaction.encodedSignatures(),
-    { gasLimit: gasLimit + RSK_GAS_PATCH }
-  )
-
-  return txResponse
-}
-
 export const executeTransaction = async (
   safe: Safe,
   safeTransaction: SafeTransaction
-): Promise<ContractTransaction> => {
+): Promise<TransactionResult> => {
   const chainId = await safe.getChainId()
   if (RSK_CHAIN_IDS.includes(chainId)) {
-    return executeTransactionOnRSK(safe, safeTransaction)
+    const ethAdapter = safe.getEthAdapter()
+    const safeContract = ethAdapter.getContract(safe.getAddress(), safeAbi)
+    const signerAddress = await ethAdapter.getSignerAddress()
+    const gasLimit = await estimateGasForTransactionExecution(
+      safeContract,
+      signerAddress.toLowerCase(),
+      safeTransaction
+    )
+    return safe.executeTransaction(safeTransaction, {
+      gasLimit: gasLimit + RSK_GAS_PATCH
+    })
   } else {
     return safe.executeTransaction(safeTransaction)
   }

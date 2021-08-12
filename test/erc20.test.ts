@@ -1,10 +1,11 @@
+import EthersSafe, { EthersAdapter } from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { BigNumber } from 'ethers'
 import { deployments, ethers, waffle } from 'hardhat'
 import { ERC20TransactionBuilder } from '../src'
-import { getSafeWithOwners, balanceVerifierFactory } from './utils/setup'
-import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import { balanceVerifierFactory, createEthersSafe, getSafeWithOwners } from './utils/setup'
 chai.use(chaiAsPromised)
 
 describe('ERC20 transaction builder', () => {
@@ -16,7 +17,7 @@ describe('ERC20 transaction builder', () => {
     const MockERC20Token = await MockERC20Factory.deploy()
     await MockERC20Token.deployed()
     const safe = await getSafeWithOwners([user1.address, user2.address])
-    const ethersSafe = await EthersSafe.create(ethers, safe.address, user1)
+    const ethersSafe = await createEthersSafe(user1, safe.address)
     const erc20TransactionBuilder = await ERC20TransactionBuilder.create(
       ethersSafe,
       MockERC20Token.address
@@ -24,10 +25,13 @@ describe('ERC20 transaction builder', () => {
 
     const signAndExecuteTx = async (safeERC20: EthersSafe, safeTransaction: SafeTransaction) => {
       await safeERC20.signTransaction(safeTransaction)
-
-      const safeSDk2 = await safeERC20.connect(user2)
+      const ethAdapterOwner2 = new EthersAdapter({
+        ethers,
+        signer: user2
+      })
+      const safeSDk2 = await safeERC20.connect({ ethAdapter: ethAdapterOwner2 })
       const txResponse = await safeSDk2.executeTransaction(safeTransaction)
-      await txResponse.wait()
+      await txResponse.transactionResponse?.wait()
     }
 
     const accountBalanceVerifier = async (accountAddress: string) => {

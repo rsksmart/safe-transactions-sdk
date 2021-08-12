@@ -20,6 +20,13 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     deterministicDeployment: true
   })
 
+  await deploy('MultiSend', {
+    from: deployer,
+    args: [],
+    log: true,
+    deterministicDeployment: true
+  })
+
   await deploy('DefaultCallbackHandler', {
     from: deployer,
     args: [],

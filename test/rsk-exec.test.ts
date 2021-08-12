@@ -1,16 +1,19 @@
+import EthersSafe from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import spies from 'chai-spies'
-import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
-import { deployments, ethers, waffle } from 'hardhat'
+import { deployments, waffle } from 'hardhat'
+import { executeTransaction } from '../src'
 import {
   EMPTY_DATA,
   RSK_CHAIN_IDS,
   RSK_MAINNET_CHAIN_ID,
   RSK_TESTNET_CHAIN_ID
 } from '../src/utils/constants'
-import { getSafeWithOwners } from './utils/setup'
-import { executeTransaction } from '../src'
+import { createEthersSafe, getSafeWithOwners } from './utils/setup'
+import safeAbi from '../src/utils/SafeAbiV1-2-0.json'
+import { estimateGasForTransactionExecution } from '../src/utils/execute'
 chai.use(chaiAsPromised)
 chai.use(spies)
 
@@ -24,13 +27,12 @@ describe('Transaction execution', () => {
   const setupTests = deployments.createFixture(async ({ deployments }) => {
     await deployments.fixture()
     const safe = await getSafeWithOwners([user1.address])
-    const ethersSafe = await EthersSafe.create(ethers, safe.address, user1)
-
+    const ethersSafe = await createEthersSafe(user1, safe.address)
     const signAndExecuteTx = async (safeERC20: EthersSafe, safeTransaction: SafeTransaction) => {
       await safeERC20.signTransaction(safeTransaction)
 
       const txResponse = await executeTransaction(safeERC20, safeTransaction)
-      return await txResponse.wait()
+      return await txResponse.transactionResponse?.wait()
     }
 
     return {
@@ -48,7 +50,7 @@ describe('Transaction execution', () => {
     })
     chai.spy.on(ethersSafe, 'executeTransaction')
     await signAndExecuteTx(ethersSafe, safeTx)
-    expect(ethersSafe.executeTransaction).to.have.been.called.with(safeTx)
+    expect(ethersSafe.executeTransaction).to.have.been.called.with.exactly(safeTx)
   })
 
   // RSK TESTNET and RSK MAINNET
@@ -57,10 +59,10 @@ describe('Transaction execution', () => {
     [RSK_MAINNET_CHAIN_ID.toString()]: 'MAINNET'
   }
   RSK_CHAIN_IDS.forEach((chainId: number) => {
-    it(`should call the modified version of 'executeTransaction' if it's running on RSK ${
+    it(`should call the 'executeTransaction' even if it's running on RSK ${
       rsk_network_names[chainId.toString()]
     }`, async () => {
-      const { ethersSafe, signAndExecuteTx } = await setupTests()
+      const { ethersSafe } = await setupTests()
       chai.spy.on(ethersSafe, 'getChainId', () => chainId)
       const safeTx = await ethersSafe.createTransaction({
         to: user3.address,
@@ -68,8 +70,23 @@ describe('Transaction execution', () => {
         data: EMPTY_DATA
       })
       chai.spy.on(ethersSafe, 'executeTransaction')
-      await signAndExecuteTx(ethersSafe, safeTx)
-      expect(ethersSafe.executeTransaction).not.to.have.been.called()
+
+      await ethersSafe.signTransaction(safeTx)
+      const ethAdapter = ethersSafe.getEthAdapter()
+      const safeContract = ethAdapter.getContract(ethersSafe.getAddress(), safeAbi)
+      const signerAddress = await ethAdapter.getSignerAddress()
+      const gasLimit = await estimateGasForTransactionExecution(
+        safeContract,
+        signerAddress.toLowerCase(),
+        safeTx
+      )
+      // for the RSK networks we applied a patch
+      const expectedGasLimit = gasLimit + 30_000
+      const txResponse = await executeTransaction(ethersSafe, safeTx)
+      await txResponse.transactionResponse?.wait()
+      expect(ethersSafe.executeTransaction).to.have.been.first.called.with.exactly(safeTx, {
+        gasLimit: expectedGasLimit
+      })
     })
   })
 })

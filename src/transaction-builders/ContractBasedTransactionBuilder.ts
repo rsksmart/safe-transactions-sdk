@@ -1,4 +1,5 @@
-import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import Safe from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import { utils } from 'ethers'
 import { FunctionFragment } from 'ethers/lib/utils'
 import { RawTransactionBuilder } from './RawTransactionBuilder'

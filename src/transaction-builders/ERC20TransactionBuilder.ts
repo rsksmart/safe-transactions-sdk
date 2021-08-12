@@ -1,4 +1,5 @@
-import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import Safe from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import { BigNumber, utils } from 'ethers'
 import { validateIsDeployedContract } from '../utils/contracts'
 import { ContractBasedTransactionBuilder } from './ContractBasedTransactionBuilder'

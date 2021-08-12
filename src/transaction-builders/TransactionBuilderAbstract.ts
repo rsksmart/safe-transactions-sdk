@@ -1,4 +1,4 @@
-import { Safe } from '@gnosis.pm/safe-core-sdk'
+import Safe from '@gnosis.pm/safe-core-sdk'
 
 export abstract class TransactionBuilderAbstract {
   #safe!: Safe
