@@ -1,10 +1,11 @@
-import EthersSafe, { SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import EthersSafe, { EthersAdapter } from '@gnosis.pm/safe-core-sdk'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 import chai, { expect } from 'chai'
-import { deployments, ethers, waffle } from 'hardhat'
 import chaiAsPromised from 'chai-as-promised'
-import { getSafeWithOwners } from './utils/setup'
-import { EMPTY_DATA } from '../src/utils/constants'
+import { deployments, ethers, waffle } from 'hardhat'
 import { rejectTx } from '../src/'
+import { EMPTY_DATA } from '../src/utils/constants'
+import { createEthersSafe, getSafeWithOwners } from './utils/setup'
 chai.use(chaiAsPromised)
 
 describe('Transaction rejection', () => {
@@ -13,8 +14,7 @@ describe('Transaction rejection', () => {
   const setupTests = deployments.createFixture(async ({ deployments }) => {
     await deployments.fixture()
     const safe = await getSafeWithOwners([user1.address, user2.address])
-    const ethersSafe = await EthersSafe.create(ethers, safe.address, user1)
-
+    const ethersSafe = await createEthersSafe(user1, safe.address)
     const initialTx = await ethersSafe.createTransaction({
       to: user3.address,
       data: EMPTY_DATA,
@@ -23,10 +23,14 @@ describe('Transaction rejection', () => {
 
     const signAndExecuteTx = async (safeERC20: EthersSafe, safeTransaction: SafeTransaction) => {
       await safeERC20.signTransaction(safeTransaction)
+      const ethAdapterOwner2 = new EthersAdapter({
+        ethers,
+        signer: user2
+      })
 
-      const safeSDk2 = await safeERC20.connect(user2)
+      const safeSDk2 = await safeERC20.connect({ ethAdapter: ethAdapterOwner2 })
       const txResponse = await safeSDk2.executeTransaction(safeTransaction)
-      await txResponse.wait()
+      await txResponse.transactionResponse?.wait()
     }
 
     return {

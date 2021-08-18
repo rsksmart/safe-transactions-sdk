@@ -1,7 +1,8 @@
-import { Safe, SafeTransaction } from '@gnosis.pm/safe-core-sdk'
+import Safe from '@gnosis.pm/safe-core-sdk'
 import { BigNumber, utils } from 'ethers'
 import { ContractBasedTransactionBuilder } from './ContractBasedTransactionBuilder'
 import { validateIsDeployedContract } from '../utils/contracts'
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types'
 
 const ERC721_CONTRACT_INTERFACE = new utils.Interface([
   'function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable',
